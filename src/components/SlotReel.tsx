@@ -10,6 +10,7 @@ type SlotReelProps = {
   spinDelay?: number;
   onSpinEnd?: (result: string) => void;
   reelIndex: number;
+  showWinLine?: boolean;
 };
 
 const SlotReel: React.FC<SlotReelProps> = ({
@@ -19,6 +20,7 @@ const SlotReel: React.FC<SlotReelProps> = ({
   spinDelay = 0,
   onSpinEnd,
   reelIndex,
+  showWinLine = false,
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [visibleSymbols, setVisibleSymbols] = useState([...symbols.slice(0, 3)]);
@@ -80,9 +82,11 @@ const SlotReel: React.FC<SlotReelProps> = ({
   }, [spinning, isSpinning, spinDuration, spinDelay, symbols, onSpinEnd, reelIndex]);
 
   return (
-    <div className="reel-container h-72 w-28 rounded-lg border-2 border-gray-800 p-1 flex flex-col items-center justify-center relative">
-      {/* Highlight lines */}
-      <div className="absolute w-full h-0.5 bg-red-600 top-1/2 transform -translate-y-1/2 z-10"></div>
+    <div className="reel-container h-72 w-28 rounded-lg border-2 border-gray-800 p-1 flex flex-col items-center justify-center relative overflow-hidden">
+      {/* Highlight winning line - only show when there is a win */}
+      {showWinLine && (
+        <div className="absolute w-full h-1 bg-red-600 top-1/2 transform -translate-y-1/2 z-10 animate-pulse"></div>
+      )}
       
       {/* Reel content */}
       <div 
@@ -102,10 +106,18 @@ const SlotReel: React.FC<SlotReelProps> = ({
             <SlotSymbol 
               type={symbol} 
               size="md"
-              highlighted={idx === 1 && !isSpinning && !spinning} 
+              highlighted={idx === 1 && !isSpinning && !spinning && showWinLine} 
             />
           </div>
         ))}
+      </div>
+      
+      {/* Chrome effect to make it more realistic */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-0 left-0 right-0 h-10 bg-gradient-to-b from-white/20 to-transparent"></div>
+        <div className="absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-white/20 to-transparent"></div>
+        <div className="absolute top-0 bottom-0 left-0 w-3 bg-gradient-to-r from-white/20 to-transparent"></div>
+        <div className="absolute top-0 bottom-0 right-0 w-3 bg-gradient-to-l from-white/20 to-transparent"></div>
       </div>
     </div>
   );

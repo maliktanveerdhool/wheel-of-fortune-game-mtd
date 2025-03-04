@@ -123,7 +123,7 @@
 .slot-machine {
   background: linear-gradient(180deg, #6a0000 0%, #8a0000 100%);
   border: 8px solid #d4af37;
-  box-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+  box-shadow: 0 0 30px rgba(255, 215, 0, 0.5), inset 0 0 20px rgba(0, 0, 0, 0.4);
 }
 
 .button-3d {
@@ -166,6 +166,21 @@
   animation: rotate 60s linear infinite;
 }
 
+/* Casino pattern */
+.bg-pattern-casino {
+  background-color: #321e1e;
+  background-image: 
+    radial-gradient(rgba(255, 215, 0, 0.2) 2px, transparent 2px),
+    radial-gradient(rgba(255, 215, 0, 0.2) 2px, transparent 2px);
+  background-size: 20px 20px;
+  background-position: 0 0, 10px 10px;
+}
+
+/* Chrome effect */
+.chrome-effect {
+  background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(0,0,0,0.1) 100%);
+}
+
 @keyframes rotate {
   from {
     transform: rotate(0deg);
@@ -174,3 +189,22 @@
     transform: rotate(360deg);
   }
 }
+
+@keyframes shine {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
+@keyframes pulse-gold {
+  0%, 100% {
+    box-shadow: 0 0 10px 2px rgba(255, 215, 0, 0.6);
+  }
+  50% {
+    box-shadow: 0 0 20px 5px rgba(255, 215, 0, 0.9);
+  }
+}
+
