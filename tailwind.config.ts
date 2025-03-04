@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,6 +62,19 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				gold: {
+					light: '#FFD700',
+					DEFAULT: '#D4AF37',
+					dark: '#996515'
+				},
+				slot: {
+					red: '#e63946',
+					purple: '#9b5de5',
+					blue: '#00b4d8',
+					green: '#2a9d8f',
+					background: '#333',
+					border: '#FFD700'
 				}
 			},
 			borderRadius: {
@@ -70,25 +84,46 @@ export default {
 			},
 			keyframes: {
 				'accordion-down': {
-					from: {
-						height: '0'
-					},
-					to: {
-						height: 'var(--radix-accordion-content-height)'
-					}
+					from: { height: '0' },
+					to: { height: 'var(--radix-accordion-content-height)' }
 				},
 				'accordion-up': {
-					from: {
-						height: 'var(--radix-accordion-content-height)'
-					},
-					to: {
-						height: '0'
-					}
+					from: { height: 'var(--radix-accordion-content-height)' },
+					to: { height: '0' }
+				},
+				'spin-slow': {
+					'0%': { transform: 'translateY(0)' },
+					'100%': { transform: 'translateY(-300%)' }
+				},
+				'pulse-glow': {
+					'0%, 100%': { boxShadow: '0 0 10px 5px rgba(255,215,0,0.3)' },
+					'50%': { boxShadow: '0 0 20px 10px rgba(255,215,0,0.6)' }
+				},
+				'slide-in': {
+					'0%': { transform: 'translateY(100%)', opacity: '0' },
+					'100%': { transform: 'translateY(0)', opacity: '1' }
+				},
+				'bounce-light': {
+					'0%, 100%': { transform: 'translateY(0)', boxShadow: '0 5px 15px rgba(0,0,0,0.2)' },
+					'50%': { transform: 'translateY(-10px)', boxShadow: '0 15px 25px rgba(0,0,0,0.1)' }
+				},
+				'shine': {
+					'0%': { backgroundPosition: '200% 0' },
+					'100%': { backgroundPosition: '-200% 0' }
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'spin-reel': 'spin-slow 0.5s linear infinite',
+				'pulse-glow': 'pulse-glow 2s infinite',
+				'slide-in': 'slide-in 0.5s ease-out forwards',
+				'bounce-light': 'bounce-light 2s infinite',
+				'shine': 'shine 3s linear infinite'
+			},
+			backgroundImage: {
+				'gold-gradient': 'linear-gradient(45deg, #FFD700, #FFC107, #FFD700)',
+				'red-rays': 'radial-gradient(circle, #7a0000 0%, #460000 100%)'
 			}
 		}
 	},
