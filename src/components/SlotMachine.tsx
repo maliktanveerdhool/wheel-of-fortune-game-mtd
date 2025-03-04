@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import SlotReel from './SlotReel';
 import { Button } from '@/components/ui/button';
@@ -87,29 +86,25 @@ const SlotMachine: React.FC = () => {
     // Check if all reels have stopped
     if (reelIndex === 2) {
       setTimeout(() => {
-        checkWin();
+        const resultKey = reelResults.join('-');
+        
+        // Check if it matches any winning combination
+        if (PAYOUTS[resultKey as keyof typeof PAYOUTS]) {
+          const multiplier = PAYOUTS[resultKey as keyof typeof PAYOUTS];
+          const winAmount = bet * multiplier;
+          
+          setWin(winAmount);
+          setBalance(prev => prev + winAmount);
+          setWinningLine(true);
+          
+          // Display win animation and message immediately
+          toast.success(`You won ${winAmount.toLocaleString()}!`, {
+            position: "top-center"
+          });
+        }
+        
         setSpinning(false);
       }, 500);
-    }
-  };
-
-  const checkWin = () => {
-    // Create a key from the reel results
-    const resultKey = reelResults.join('-');
-    
-    // Check if it matches any winning combination
-    if (PAYOUTS[resultKey as keyof typeof PAYOUTS]) {
-      const multiplier = PAYOUTS[resultKey as keyof typeof PAYOUTS];
-      const winAmount = bet * multiplier;
-      
-      setWin(winAmount);
-      setBalance(prev => prev + winAmount);
-      setWinningLine(true);
-      
-      // Display win animation and message
-      toast.success(`You won ${winAmount.toLocaleString()}!`, {
-        position: "top-center"
-      });
     }
   };
 
