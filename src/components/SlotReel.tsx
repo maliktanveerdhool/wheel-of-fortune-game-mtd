@@ -25,11 +25,32 @@ const SlotReel: React.FC<SlotReelProps> = ({
   const [currentIndex, setCurrentIndex] = useState(0);
   const [visibleSymbols, setVisibleSymbols] = useState([...symbols.slice(0, 3)]);
   const [isSpinning, setIsSpinning] = useState(false);
+  const [spinSpeed, setSpinSpeed] = useState(100);
   const spinTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const spinInterval = useRef<NodeJS.Timeout | null>(null);
+  const reelRef = useRef<HTMLDivElement>(null);
 
   // Function to get random symbol position
   const getRandomSymbolIndex = () => Math.floor(Math.random() * symbols.length);
+
+  // Function to get valid symbols (ensure no BLANK during spinning)
+  const getValidSpinSymbol = () => {
+    const validSymbols = symbols.filter(symbol => symbol !== 'BLANK');
+    return validSymbols[Math.floor(Math.random() * validSymbols.length)];
+  };
+
+  // Create a full reel of symbols for continuous animation
+  const createReelStrip = () => {
+    // Filter out BLANKs during spinning to avoid empty spaces
+    const reelSymbols = spinning ? symbols.filter(s => s !== 'BLANK') : symbols;
+    
+    let strip = [];
+    // Create enough symbols to fill the view and allow for smooth scrolling
+    for (let i = 0; i < 20; i++) {
+      strip.push(reelSymbols[Math.floor(Math.random() * reelSymbols.length)]);
+    }
+    return strip;
+  };
 
   useEffect(() => {
     if (spinning && !isSpinning) {
@@ -39,39 +60,87 @@ const SlotReel: React.FC<SlotReelProps> = ({
       spinTimeoutRef.current = setTimeout(() => {
         setIsSpinning(true);
         
+        // Create an initial reel strip with valid symbols (no BLANKs)
+        const initialStrip = [
+          getValidSpinSymbol(),
+          getValidSpinSymbol(),
+          getValidSpinSymbol(),
+          getValidSpinSymbol(),
+          getValidSpinSymbol()
+        ];
+        
+        setVisibleSymbols(initialStrip);
+        
+        // Start with fast spin speed
+        setSpinSpeed(50);
+        
         // Rapidly change visible symbols during spin
         spinInterval.current = setInterval(() => {
-          setVisibleSymbols([
-            symbols[getRandomSymbolIndex()],
-            symbols[getRandomSymbolIndex()],
-            symbols[getRandomSymbolIndex()]
-          ]);
-        }, 100);
+          setVisibleSymbols(prev => {
+            // Move symbols up (remove first, add new at end)
+            const newSymbols = [...prev.slice(1)];
+            newSymbols.push(getValidSpinSymbol());
+            return newSymbols;
+          });
+        }, spinSpeed);
         
-        // Stop spinning after duration
+        // Gradually slow down the spin before stopping
         setTimeout(() => {
           if (spinInterval.current) clearInterval(spinInterval.current);
           
-          // Final result
-          const resultIndex = getRandomSymbolIndex();
-          setCurrentIndex(resultIndex);
+          // Slower spin for "winding down" effect
+          setSpinSpeed(120);
           
-          // Show result in middle position with symbols above and below
-          const prevIndex = (resultIndex - 1 + symbols.length) % symbols.length;
-          const nextIndex = (resultIndex + 1) % symbols.length;
+          spinInterval.current = setInterval(() => {
+            setVisibleSymbols(prev => {
+              const newSymbols = [...prev.slice(1)];
+              newSymbols.push(getValidSpinSymbol());
+              return newSymbols;
+            });
+          }, spinSpeed);
           
-          setVisibleSymbols([
-            symbols[prevIndex],
-            symbols[resultIndex],
-            symbols[nextIndex]
-          ]);
-          
-          setIsSpinning(false);
-          
-          if (onSpinEnd) {
-            onSpinEnd(symbols[resultIndex]);
-          }
-        }, spinDuration);
+          // Final slowdown before stop
+          setTimeout(() => {
+            if (spinInterval.current) clearInterval(spinInterval.current);
+            
+            // Even slower for final rotations
+            setSpinSpeed(200);
+            
+            spinInterval.current = setInterval(() => {
+              setVisibleSymbols(prev => {
+                const newSymbols = [...prev.slice(1)];
+                newSymbols.push(getValidSpinSymbol());
+                return newSymbols;
+              });
+            }, spinSpeed);
+            
+            // Final stop with result
+            setTimeout(() => {
+              if (spinInterval.current) clearInterval(spinInterval.current);
+              
+              // Final result
+              const resultIndex = getRandomSymbolIndex();
+              setCurrentIndex(resultIndex);
+              
+              // Show result in middle position with symbols above and below
+              const prevIndex = (resultIndex - 1 + symbols.length) % symbols.length;
+              const nextIndex = (resultIndex + 1) % symbols.length;
+              
+              setVisibleSymbols([
+                symbols[prevIndex],
+                symbols[resultIndex],
+                symbols[nextIndex]
+              ]);
+              
+              setIsSpinning(false);
+              
+              if (onSpinEnd) {
+                onSpinEnd(symbols[resultIndex]);
+              }
+            }, 600);
+          }, 500);
+        }, spinDuration - 1600); // Subtract the time for slowdowns
+        
       }, totalDelay);
     }
     
@@ -83,6 +152,9 @@ const SlotReel: React.FC<SlotReelProps> = ({
 
   return (
     <div className="reel-container h-72 w-28 rounded-lg border-2 border-gray-800 p-1 flex flex-col items-center justify-center relative overflow-hidden">
+      {/* Glass reflection effect */}
+      <div className="absolute inset-0 bg-gradient-to-b from-white/10 to-transparent z-20 pointer-events-none"></div>
+      
       {/* Highlight winning line - only show when there is a win */}
       {showWinLine && (
         <div className="absolute w-full h-1 bg-red-600 top-1/2 transform -translate-y-1/2 z-10 animate-pulse"></div>
@@ -90,14 +162,19 @@ const SlotReel: React.FC<SlotReelProps> = ({
       
       {/* Reel content */}
       <div 
+        ref={reelRef}
         className={cn(
           "h-full w-full flex flex-col items-center py-4 transition-all duration-200",
-          isSpinning && "animate-spin-reel"
+          isSpinning ? "animate-spin-reel" : ""
         )}
+        style={{
+          transform: isSpinning ? 'translateY(-20px)' : 'translateY(0)',
+          transition: isSpinning ? 'transform 100ms linear' : 'transform 500ms cubic-bezier(0.33, 1, 0.68, 1)'
+        }}
       >
         {visibleSymbols.map((symbol, idx) => (
           <div 
-            key={idx} 
+            key={`${symbol}-${idx}`} 
             className={cn(
               "flex items-center justify-center my-2 transition-all duration-300",
               idx === 1 && !isSpinning && "scale-110"
@@ -114,10 +191,13 @@ const SlotReel: React.FC<SlotReelProps> = ({
       
       {/* Chrome effect to make it more realistic */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-0 left-0 right-0 h-10 bg-gradient-to-b from-white/20 to-transparent"></div>
-        <div className="absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-white/20 to-transparent"></div>
-        <div className="absolute top-0 bottom-0 left-0 w-3 bg-gradient-to-r from-white/20 to-transparent"></div>
-        <div className="absolute top-0 bottom-0 right-0 w-3 bg-gradient-to-l from-white/20 to-transparent"></div>
+        <div className="absolute top-0 left-0 right-0 h-16 bg-gradient-to-b from-white/20 to-transparent z-10"></div>
+        <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-white/20 to-transparent z-10"></div>
+        <div className="absolute top-0 bottom-0 left-0 w-3 bg-gradient-to-r from-white/20 to-transparent z-10"></div>
+        <div className="absolute top-0 bottom-0 right-0 w-3 bg-gradient-to-l from-white/20 to-transparent z-10"></div>
+        
+        {/* Inner shadows for depth */}
+        <div className="absolute inset-0 shadow-[inset_0_5px_15px_rgba(0,0,0,0.4)] rounded-lg"></div>
       </div>
     </div>
   );

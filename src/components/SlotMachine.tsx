@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import SlotReel from './SlotReel';
 import { Button } from '@/components/ui/button';
@@ -7,11 +6,9 @@ import { Coins, RotateCw, Volume2, VolumeX, Zap, Trophy } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import GameLogo from './GameLogo';
 
-// Define symbols and their values
 const SYMBOLS = ['BAR', 'SEVEN', 'TRIPLE', 'SPIN', 'BLANK'] as const;
 type Symbol = typeof SYMBOLS[number];
 
-// Define payout multipliers
 const PAYOUTS = {
   'BAR-BAR-BAR': 50,
   'SEVEN-SEVEN-SEVEN': 100,
@@ -35,10 +32,8 @@ const SlotMachine: React.FC = () => {
   const [winningLine, setWinningLine] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
   
-  // Available bets
   const betOptions = [50, 100, 250, 500, 1000];
 
-  // Reels configuration - each reel has different probability distribution
   const reelSymbols: Symbol[][] = [
     ['BAR', 'BAR', 'SEVEN', 'SEVEN', 'TRIPLE', 'SPIN', 'BLANK', 'BAR', 'SEVEN', 'BLANK'],
     ['BAR', 'SEVEN', 'SEVEN', 'TRIPLE', 'TRIPLE', 'SPIN', 'BLANK', 'BLANK', 'BAR', 'SEVEN'],
@@ -62,52 +57,48 @@ const SlotMachine: React.FC = () => {
   const handleSpin = () => {
     if (spinning) return;
     
-    // Check if player has enough balance
     if (balance < bet) {
       toast.error("Insufficient balance!");
       return;
     }
     
-    // Deduct bet from balance
     setBalance(prev => prev - bet);
     setWin(0);
     setWinningLine(false);
     
-    // Start spinning
     setSpinning(true);
   };
 
   const handleReelStop = (reelIndex: number, result: string) => {
-    // Update the result for this reel
     setReelResults(prev => {
       const newResults = [...prev];
       newResults[reelIndex] = result as Symbol;
       return newResults;
     });
     
-    // Check if all reels have stopped
     if (reelIndex === 2) {
       setTimeout(() => {
-        const resultKey = reelResults.join('-');
-        
-        // Check if it matches any winning combination
-        if (PAYOUTS[resultKey as keyof typeof PAYOUTS]) {
-          const multiplier = PAYOUTS[resultKey as keyof typeof PAYOUTS];
-          const winAmount = bet * multiplier;
-          
-          setWin(winAmount);
-          setBalance(prev => prev + winAmount);
-          setWinningLine(true);
-          
-          // Display win animation and message immediately
-          toast.success(`You won ${winAmount.toLocaleString()}!`, {
-            position: "top-center",
-            icon: <Trophy className="h-5 w-5 text-gold" />
-          });
-        }
-        
+        checkWinningCombination();
         setSpinning(false);
       }, 500);
+    }
+  };
+
+  const checkWinningCombination = () => {
+    const resultKey = reelResults.join('-');
+    
+    if (PAYOUTS[resultKey as keyof typeof PAYOUTS]) {
+      const multiplier = PAYOUTS[resultKey as keyof typeof PAYOUTS];
+      const winAmount = bet * multiplier;
+      
+      setWin(winAmount);
+      setBalance(prev => prev + winAmount);
+      setWinningLine(true);
+      
+      toast.success(`You won ${winAmount.toLocaleString()}!`, {
+        position: "top-center",
+        icon: <Trophy className="h-5 w-5 text-gold" />
+      });
     }
   };
 
@@ -117,7 +108,6 @@ const SlotMachine: React.FC = () => {
 
   return (
     <div className="flex flex-col items-center justify-center">
-      {/* Sound toggle */}
       <div className="self-end mb-4">
         <Button 
           variant="outline" 
@@ -133,37 +123,38 @@ const SlotMachine: React.FC = () => {
         </Button>
       </div>
       
-      {/* Game title */}
-      <div className="relative mb-4">
+      <div className="relative mb-6">
         <GameLogo size="md" />
         <div className="flex justify-between w-full px-4 mt-2">
-          <div className="gold-text text-2xl font-bold">TRIPLE GOLD</div>
-          <div className="gold-text text-2xl font-bold">GOLD SPIN</div>
+          <div className="gold-text text-2xl font-bold shine-effect">TRIPLE GOLD</div>
+          <div className="gold-text text-2xl font-bold shine-effect">GOLD SPIN</div>
         </div>
       </div>
       
-      {/* Slot machine cabinet */}
       <div className="slot-machine rounded-xl p-6 relative shadow-2xl">
-        {/* Top display with flashing lights */}
-        <div className="bg-black rounded-lg mb-4 p-2 border-2 border-gold-dark flex justify-between items-center">
-          <div className="text-white font-bold">WHEEL OF FORTUNE</div>
+        <div className="bg-black rounded-lg mb-6 p-3 border-2 border-gold-dark flex justify-between items-center">
+          <div className="text-white font-bold text-lg">WHEEL OF FORTUNE</div>
           <div className="flex gap-2 items-center">
             {Array.from({length: 5}).map((_, i) => (
               <div 
                 key={`top-${i}`} 
                 className={cn(
-                  "w-2 h-2 rounded-full",
-                  spinning ? "animate-pulse bg-red-500" : "bg-amber-500"
+                  "w-3 h-3 rounded-full",
+                  spinning ? "animate-pulse bg-amber-400" : "bg-amber-500"
                 )}
+                style={{ 
+                  animationDelay: `${i * 0.2}s`,
+                  boxShadow: spinning ? '0 0 8px 2px rgba(255, 215, 0, 0.6)' : 'none'
+                }}
               ></div>
             ))}
           </div>
-          <div className="text-gold font-bold">GOLD SPIN</div>
+          <div className="text-gold font-bold text-lg">GOLD SPIN</div>
         </div>
         
-        {/* Reels container */}
         <div className="flex justify-center gap-3 p-4 bg-black rounded-lg border-4 border-slot-border relative">
-          {/* Reels */}
+          <div className="absolute inset-0 border-4 border-gold-dark rounded-lg opacity-60 pointer-events-none"></div>
+          
           {reelSymbols.map((symbols, index) => (
             <SlotReel
               key={index}
@@ -176,15 +167,19 @@ const SlotMachine: React.FC = () => {
             />
           ))}
           
-          {/* Light decorations on the sides */}
           <div className="absolute left-0 top-0 bottom-0 w-2 flex flex-col justify-around">
             {Array.from({length: 8}).map((_, i) => (
               <div 
                 key={`left-${i}`} 
                 className={cn(
-                  "w-2 h-2 rounded-full",
-                  spinning ? "animate-pulse bg-amber-500" : "bg-red-500"
+                  "w-3 h-3 rounded-full",
+                  spinning ? "animate-pulse bg-red-500" : "bg-red-600"
                 )}
+                style={{ 
+                  animationDelay: `${i * 0.15}s`,
+                  boxShadow: spinning ? '0 0 8px 2px rgba(255, 0, 0, 0.4)' : 'none',
+                  marginLeft: '-4px'
+                }}
               ></div>
             ))}
           </div>
@@ -194,17 +189,20 @@ const SlotMachine: React.FC = () => {
               <div 
                 key={`right-${i}`} 
                 className={cn(
-                  "w-2 h-2 rounded-full",
-                  spinning ? "animate-pulse bg-amber-500" : "bg-red-500"
+                  "w-3 h-3 rounded-full",
+                  spinning ? "animate-pulse bg-red-500" : "bg-red-600"
                 )}
+                style={{ 
+                  animationDelay: `${i * 0.15}s`,
+                  boxShadow: spinning ? '0 0 8px 2px rgba(255, 0, 0, 0.4)' : 'none',
+                  marginRight: '-4px'
+                }}
               ></div>
             ))}
           </div>
         </div>
         
-        {/* Controls section with metallic look */}
-        <div className="flex justify-between mt-4 gap-3 p-3 bg-gradient-to-b from-gray-700 to-gray-900 rounded-lg border border-gray-600">
-          {/* Bet controls */}
+        <div className="flex justify-between mt-6 gap-3 p-4 bg-gradient-to-b from-gray-700 to-gray-900 rounded-lg border border-gray-600 shadow-lg">
           <div className="flex items-center gap-2">
             <Button 
               variant="outline" 
@@ -232,29 +230,29 @@ const SlotMachine: React.FC = () => {
             </Button>
           </div>
           
-          {/* Win display */}
           <div className="flex flex-col items-center justify-center bg-black rounded-lg border-2 border-gold px-6 py-2 min-w-28 shadow-inner">
             <span className={cn(
               "text-xl font-bold",
               win > 0 ? "text-gold animate-pulse" : "text-white"
-            )}>
+            )}
+              style={{
+                textShadow: win > 0 ? '0 0 10px rgba(255, 215, 0, 0.8)' : 'none'
+              }}
+            >
               {win.toLocaleString()}
             </span>
             <span className="text-white text-xs">WIN</span>
           </div>
           
-          {/* Balance display */}
           <div className="flex flex-col items-center justify-center bg-black rounded-lg border-2 border-gold px-4 py-2 min-w-28 shadow-inner">
             <span className="text-gold text-xl font-bold">{balance.toLocaleString()}</span>
             <span className="text-white text-xs">BALANCE</span>
           </div>
         </div>
         
-        {/* Decorative casino pattern at the bottom */}
-        <div className="w-full h-4 mt-4 bg-pattern-casino"></div>
+        <div className="w-full h-6 mt-4 bg-pattern-casino rounded-b-lg border-t-2 border-gold-dark/30"></div>
       </div>
       
-      {/* Spin button with more realistic effects */}
       <div className="mt-6">
         <Button 
           onClick={handleSpin} 
@@ -267,7 +265,6 @@ const SlotMachine: React.FC = () => {
             "shadow-lg flex items-center justify-center overflow-hidden"
           )}
         >
-          {/* Inner glow effect */}
           <div className="absolute inset-0 rounded-full bg-white/20 opacity-70"></div>
           
           {spinning ? (
@@ -278,6 +275,14 @@ const SlotMachine: React.FC = () => {
               <Coins className="h-10 w-10 text-white relative z-10" />
             </>
           )}
+          
+          <div className={cn(
+            "absolute inset-0 rounded-full",
+            spinning ? "animate-none" : "animate-pulse-glow"
+          )} 
+          style={{
+            boxShadow: spinning ? 'none' : '0 0 15px 5px rgba(20, 184, 166, 0.4)'
+          }}></div>
         </Button>
       </div>
     </div>
