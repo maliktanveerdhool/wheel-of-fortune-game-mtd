@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import SlotReel from './SlotReel';
 import { Button } from '@/components/ui/button';
@@ -34,10 +35,12 @@ const SlotMachine: React.FC = () => {
   
   const betOptions = [50, 100, 250, 500, 1000];
 
+  // Use only non-BLANK symbols for actual gameplay
+  // This ensures no empty slots appear during spinning
   const reelSymbols: Symbol[][] = [
-    ['BAR', 'BAR', 'SEVEN', 'SEVEN', 'TRIPLE', 'SPIN', 'BLANK', 'BAR', 'SEVEN', 'BLANK'],
-    ['BAR', 'SEVEN', 'SEVEN', 'TRIPLE', 'TRIPLE', 'SPIN', 'BLANK', 'BLANK', 'BAR', 'SEVEN'],
-    ['SEVEN', 'SEVEN', 'TRIPLE', 'BAR', 'SPIN', 'SPIN', 'BLANK', 'BLANK', 'TRIPLE', 'BAR']
+    ['BAR', 'BAR', 'SEVEN', 'SEVEN', 'TRIPLE', 'SPIN', 'BAR', 'SEVEN'],
+    ['BAR', 'SEVEN', 'SEVEN', 'TRIPLE', 'TRIPLE', 'SPIN', 'BAR', 'SEVEN'],
+    ['SEVEN', 'SEVEN', 'TRIPLE', 'BAR', 'SPIN', 'SPIN', 'TRIPLE', 'BAR']
   ];
 
   const increaseBet = () => {
