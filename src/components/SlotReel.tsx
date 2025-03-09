@@ -152,12 +152,49 @@ const SlotReel: React.FC<SlotReelProps> = ({
 
   return (
     <div className="reel-container h-72 w-28 rounded-lg border-2 border-gray-800 p-1 flex flex-col items-center justify-center relative overflow-hidden">
+      {/* Marquee lights around the reel */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute left-0 top-0 bottom-0 flex flex-col justify-around">
+          {Array.from({length: 10}).map((_, i) => (
+            <div 
+              key={`left-${i}`} 
+              className={cn(
+                "w-2 h-2 rounded-full",
+                spinning ? "animate-pulse bg-red-500" : "bg-red-600"
+              )}
+              style={{ 
+                animationDelay: `${i * 0.15}s`,
+                boxShadow: spinning ? '0 0 8px 2px rgba(255, 0, 0, 0.6)' : '0 0 5px 1px rgba(255, 0, 0, 0.3)',
+                marginLeft: '2px'
+              }}
+            ></div>
+          ))}
+        </div>
+        
+        <div className="absolute right-0 top-0 bottom-0 flex flex-col justify-around">
+          {Array.from({length: 10}).map((_, i) => (
+            <div 
+              key={`right-${i}`} 
+              className={cn(
+                "w-2 h-2 rounded-full",
+                spinning ? "animate-pulse bg-red-500" : "bg-red-600"
+              )}
+              style={{ 
+                animationDelay: `${i * 0.15}s`,
+                boxShadow: spinning ? '0 0 8px 2px rgba(255, 0, 0, 0.6)' : '0 0 5px 1px rgba(255, 0, 0, 0.3)',
+                marginRight: '2px'
+              }}
+            ></div>
+          ))}
+        </div>
+      </div>
+      
       {/* Glass reflection effect */}
-      <div className="absolute inset-0 bg-gradient-to-b from-white/10 to-transparent z-20 pointer-events-none"></div>
+      <div className="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent z-20 pointer-events-none"></div>
       
       {/* Highlight winning line - only show when there is a win */}
       {showWinLine && (
-        <div className="absolute w-full h-1 bg-red-600 top-1/2 transform -translate-y-1/2 z-10 animate-pulse"></div>
+        <div className="absolute w-full h-2 bg-red-600 top-1/2 transform -translate-y-1/2 z-10 animate-pulse shadow-[0_0_10px_rgba(255,0,0,0.8)]"></div>
       )}
       
       {/* Reel content */}
@@ -193,8 +230,6 @@ const SlotReel: React.FC<SlotReelProps> = ({
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-0 left-0 right-0 h-16 bg-gradient-to-b from-white/20 to-transparent z-10"></div>
         <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-white/20 to-transparent z-10"></div>
-        <div className="absolute top-0 bottom-0 left-0 w-3 bg-gradient-to-r from-white/20 to-transparent z-10"></div>
-        <div className="absolute top-0 bottom-0 right-0 w-3 bg-gradient-to-l from-white/20 to-transparent z-10"></div>
         
         {/* Inner shadows for depth */}
         <div className="absolute inset-0 shadow-[inset_0_5px_15px_rgba(0,0,0,0.4)] rounded-lg"></div>
