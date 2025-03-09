@@ -5,10 +5,12 @@ import SlotMachine from '@/components/SlotMachine';
 const Index = () => {
   return (
     <div className="min-h-screen w-full flex flex-col items-center justify-center pt-8 pb-12 casino-background overflow-hidden">
-      <div className="relative z-10 container max-w-4xl mx-auto px-4">
+      <div className="relative z-10 container max-w-4xl mx-auto px-4 flex flex-col items-center">
+        <h1 className="game-title text-center mb-8 title-3d">Wheel of Fortune</h1>
+        
         <SlotMachine />
         
-        <div className="mt-12 bg-black/40 backdrop-blur-sm rounded-lg p-6 text-white max-w-2xl mx-auto border border-gold/30">
+        <div className="mt-12 bg-black/60 backdrop-blur-sm rounded-lg p-6 text-white max-w-2xl mx-auto border border-gold/40">
           <h2 className="gold-text text-2xl font-bold mb-4">How to Play</h2>
           <ul className="space-y-2 text-sm">
             <li>• Set your bet amount using the + and - buttons</li>

@@ -25,19 +25,19 @@ const SlotReel: React.FC<SlotReelProps> = ({
   // Always filter out BLANK symbols during spinning to prevent empty slots
   const validSymbols = symbols.filter(symbol => symbol !== 'BLANK');
   
-  const [currentIndex, setCurrentIndex] = useState(0);
   const [visibleSymbols, setVisibleSymbols] = useState([
     validSymbols[Math.floor(Math.random() * validSymbols.length)],
     validSymbols[Math.floor(Math.random() * validSymbols.length)],
     validSymbols[Math.floor(Math.random() * validSymbols.length)]
   ]);
   const [isSpinning, setIsSpinning] = useState(false);
-  const [spinSpeed, setSpinSpeed] = useState(30); // Faster initial speed for smoother animation
+  const [spinSpeed, setSpinSpeed] = useState(20); // Faster initial speed for smoother animation
   const spinTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const spinInterval = useRef<NodeJS.Timeout | null>(null);
-  const reelRef = useRef<HTMLDivElement>(null);
   const animationRef = useRef<number | null>(null);
   const lastTimestampRef = useRef<number>(0);
+  const spinCountRef = useRef(0);
+  const stripRef = useRef<string[]>([]);
+  const stripPositionRef = useRef(0);
 
   // Function to get random valid symbol (never BLANK)
   const getRandomSymbol = () => {
@@ -45,7 +45,7 @@ const SlotReel: React.FC<SlotReelProps> = ({
   };
 
   // Function to create a full strip of symbols for animation
-  const createReelStrip = (count: number = 15) => {
+  const createReelStrip = (count: number = 30) => {
     let strip = [];
     for (let i = 0; i < count; i++) {
       strip.push(getRandomSymbol());
@@ -62,11 +62,20 @@ const SlotReel: React.FC<SlotReelProps> = ({
     if (elapsed > spinSpeed) {
       lastTimestampRef.current = timestamp;
       
-      setVisibleSymbols(prev => {
-        const newSymbols = [...prev.slice(1)];
-        newSymbols.push(getRandomSymbol());
-        return newSymbols;
-      });
+      // Update strip position
+      stripPositionRef.current++;
+      if (stripPositionRef.current >= stripRef.current.length - 3) {
+        stripPositionRef.current = 0;
+      }
+      
+      // Get current visible symbols from the strip
+      setVisibleSymbols([
+        stripRef.current[(stripPositionRef.current) % stripRef.current.length],
+        stripRef.current[(stripPositionRef.current + 1) % stripRef.current.length],
+        stripRef.current[(stripPositionRef.current + 2) % stripRef.current.length]
+      ]);
+      
+      spinCountRef.current++;
     }
     
     if (isSpinning) {
@@ -79,15 +88,12 @@ const SlotReel: React.FC<SlotReelProps> = ({
       cancelAnimationFrame(animationRef.current);
       animationRef.current = null;
     }
-    if (spinInterval.current) {
-      clearInterval(spinInterval.current);
-      spinInterval.current = null;
-    }
     if (spinTimeoutRef.current) {
       clearTimeout(spinTimeoutRef.current);
       spinTimeoutRef.current = null;
     }
     lastTimestampRef.current = 0;
+    spinCountRef.current = 0;
   };
 
   useEffect(() => {
@@ -99,54 +105,74 @@ const SlotReel: React.FC<SlotReelProps> = ({
         setIsSpinning(true);
         
         // Create a strip with only valid symbols
-        const initialStrip = createReelStrip(5);
-        setVisibleSymbols(initialStrip.slice(0, 3));
+        stripRef.current = createReelStrip(30);
+        stripPositionRef.current = 0;
         
-        // Start with fast spin speed using requestAnimationFrame
-        setSpinSpeed(30);
+        // Get initial visible symbols
+        setVisibleSymbols([
+          stripRef.current[0],
+          stripRef.current[1],
+          stripRef.current[2]
+        ]);
+        
+        // Start with very fast spin speed
+        setSpinSpeed(15);
         animationRef.current = requestAnimationFrame(animateReel);
         
-        // Gradually slow down
+        // Schedule gradual slowdown for realistic inertia effect
+        const slowdownStart = spinDuration * 0.6;
+        const finalSlowdownStart = spinDuration * 0.75;
+        const stopTime = spinDuration * 0.9;
+        
+        // First phase - fast spinning
+        setTimeout(() => {
+          // Medium-fast speed
+          setSpinSpeed(25);
+        }, slowdownStart / 3);
+        
+        // Second phase - beginning to slow down
         setTimeout(() => {
           // Medium speed
-          setSpinSpeed(50);
+          setSpinSpeed(40);
+        }, slowdownStart);
+        
+        // Third phase - slowing down more
+        setTimeout(() => {
+          // Slow speed
+          setSpinSpeed(60);
+        }, finalSlowdownStart);
+        
+        // Fourth phase - very slow, almost stopping
+        setTimeout(() => {
+          // Very slow
+          setSpinSpeed(90);
+        }, stopTime);
+        
+        // Final stop with result
+        setTimeout(() => {
+          stopAnimation();
           
-          setTimeout(() => {
-            // Slower speed
-            setSpinSpeed(80);
-            
-            setTimeout(() => {
-              // Final very slow speed before stopping
-              setSpinSpeed(120);
-              
-              // Final stop with result
-              setTimeout(() => {
-                stopAnimation();
-                
-                // Select a random result from valid symbols
-                const resultIndex = Math.floor(Math.random() * validSymbols.length);
-                const result = validSymbols[resultIndex];
-                
-                // Find valid symbols for positions above and below
-                const prevIndex = (resultIndex - 1 + validSymbols.length) % validSymbols.length;
-                const nextIndex = (resultIndex + 1) % validSymbols.length;
-                
-                // Set final visible symbols with the result in the middle
-                setVisibleSymbols([
-                  validSymbols[prevIndex],
-                  result,
-                  validSymbols[nextIndex]
-                ]);
-                
-                setIsSpinning(false);
-                
-                if (onSpinEnd) {
-                  onSpinEnd(result);
-                }
-              }, 400);
-            }, 500);
-          }, 600);
-        }, spinDuration - 1700); // Subtract the time for slowdowns
+          // Select a random result from valid symbols
+          const resultIndex = Math.floor(Math.random() * validSymbols.length);
+          const result = validSymbols[resultIndex];
+          
+          // Find valid symbols for positions above and below
+          const prevIndex = (resultIndex - 1 + validSymbols.length) % validSymbols.length;
+          const nextIndex = (resultIndex + 1) % validSymbols.length;
+          
+          // Set final visible symbols with the result in the middle
+          setVisibleSymbols([
+            validSymbols[prevIndex],
+            result,
+            validSymbols[nextIndex]
+          ]);
+          
+          setIsSpinning(false);
+          
+          if (onSpinEnd) {
+            onSpinEnd(result);
+          }
+        }, spinDuration);
         
       }, totalDelay);
     }
@@ -198,31 +224,33 @@ const SlotReel: React.FC<SlotReelProps> = ({
       {/* Glass reflection effect */}
       <div className="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent z-20 pointer-events-none"></div>
       
-      {/* Highlight winning line - only show when there is a win */}
-      {showWinLine && (
-        <div className="absolute w-full h-2 bg-red-600 top-1/2 transform -translate-y-1/2 z-10 animate-pulse shadow-[0_0_10px_rgba(255,0,0,0.8)]"></div>
-      )}
+      {/* Highlight winning line - always show as a payline, but highlighted when there's a win */}
+      <div className={cn(
+        "absolute w-full h-2 top-1/2 transform -translate-y-1/2 z-10", 
+        showWinLine 
+          ? "bg-red-600 animate-pulse shadow-[0_0_10px_rgba(255,0,0,0.8)]" 
+          : "bg-red-800/50"
+      )}></div>
       
       {/* Reel content */}
       <div 
-        ref={reelRef}
         className={cn(
-          "h-full w-full flex flex-col items-center py-4 transition-all",
+          "h-full w-full flex flex-col items-center transition-all",
           isSpinning ? "animate-spin-reel" : ""
         )}
         style={{
           transform: isSpinning ? 'translateY(-20px)' : 'translateY(0)',
           transition: isSpinning 
-            ? 'transform 50ms linear' 
+            ? 'none' 
             : 'transform 500ms cubic-bezier(0.33, 1, 0.68, 1)'
         }}
       >
         {visibleSymbols.map((symbol, idx) => (
           <div 
-            key={`${symbol}-${idx}`} 
+            key={`${symbol}-${idx}-${isSpinning ? 'spinning' : 'static'}`} 
             className={cn(
               "flex items-center justify-center my-2 transition-all duration-300",
-              idx === 1 && !isSpinning && "scale-110"
+              idx === 1 && !isSpinning && !spinning && "scale-110"
             )}
           >
             <SlotSymbol 
