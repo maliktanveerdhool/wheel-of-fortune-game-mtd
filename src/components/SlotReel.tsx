@@ -3,12 +3,14 @@ import React, { useState, useEffect, useRef } from 'react';
 import SlotSymbol from './SlotSymbol';
 import { cn } from '@/lib/utils';
 
+type SlotSymbolType = 'BAR' | 'SEVEN' | 'TRIPLE' | 'SPIN' | 'BLANK';
+
 type SlotReelProps = {
-  symbols: Array<'BAR' | 'SEVEN' | 'TRIPLE' | 'SPIN' | 'BLANK'>;
+  symbols: Array<SlotSymbolType>;
   spinning: boolean;
   spinDuration?: number;
   spinDelay?: number;
-  onSpinEnd?: (result: string) => void;
+  onSpinEnd?: (result: SlotSymbolType) => void;
   reelIndex: number;
   showWinLine?: boolean;
 };
@@ -25,7 +27,7 @@ const SlotReel: React.FC<SlotReelProps> = ({
   // Always filter out BLANK symbols during spinning to prevent empty slots
   const validSymbols = symbols.filter(symbol => symbol !== 'BLANK');
   
-  const [visibleSymbols, setVisibleSymbols] = useState([
+  const [visibleSymbols, setVisibleSymbols] = useState<SlotSymbolType[]>([
     validSymbols[Math.floor(Math.random() * validSymbols.length)],
     validSymbols[Math.floor(Math.random() * validSymbols.length)],
     validSymbols[Math.floor(Math.random() * validSymbols.length)]
@@ -36,17 +38,17 @@ const SlotReel: React.FC<SlotReelProps> = ({
   const animationRef = useRef<number | null>(null);
   const lastTimestampRef = useRef<number>(0);
   const spinCountRef = useRef(0);
-  const stripRef = useRef<string[]>([]);
+  const stripRef = useRef<SlotSymbolType[]>([]);
   const stripPositionRef = useRef(0);
 
   // Function to get random valid symbol (never BLANK)
-  const getRandomSymbol = () => {
+  const getRandomSymbol = (): SlotSymbolType => {
     return validSymbols[Math.floor(Math.random() * validSymbols.length)];
   };
 
   // Function to create a full strip of symbols for animation
-  const createReelStrip = (count: number = 30) => {
-    let strip = [];
+  const createReelStrip = (count: number = 30): SlotSymbolType[] => {
+    let strip: SlotSymbolType[] = [];
     for (let i = 0; i < count; i++) {
       strip.push(getRandomSymbol());
     }
