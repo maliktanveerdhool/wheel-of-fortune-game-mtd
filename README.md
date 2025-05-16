@@ -1,69 +1,27 @@
-# Welcome to your Lovable project
+🎡 Wheel of Fortune Game
+A fun, interactive Wheel of Fortune game built with modern web technologies. Spin the wheel, test your luck, and win rewards — all in a sleek, responsive UI.
 
-## Project info
+🎮 Features
+🎯 Interactive spinning wheel
 
-**URL**: https://lovable.dev/projects/be562070-6b5a-41fd-b86a-5fc063b9f7e9
+🔊 Sound effects (optional if included)
 
-## How can I edit this code?
+💡 Customizable rewards and segments
 
-There are several ways of editing your application.
+⚡ Fast and responsive design
 
-**Use Lovable**
+Built with React, Vite, TypeScript, Tailwind CSS, and ShadCN UI
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/be562070-6b5a-41fd-b86a-5fc063b9f7e9) and start prompting.
+🧪 Tech Stack
+React + Vite
 
-Changes made via Lovable will be committed automatically to this repo.
+TypeScript
 
-**Use your preferred IDE**
+Tailwind CSS
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+ShadCN UI
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with .
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/be562070-6b5a-41fd-b86a-5fc063b9f7e9) and click on Share -> Publish.
-
-## I want to use a custom domain - is that possible?
-
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+💼 Developer Info
+Created by Malik Tanveer at MTD Technologies
+🌐 https://malik.mtdtechnologies.com/
+🌐 https://mtdtechnologies.com/
